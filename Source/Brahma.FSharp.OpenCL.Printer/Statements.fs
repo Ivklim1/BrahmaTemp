@@ -90,7 +90,6 @@ and Print isToplevel (stmt:Statement<'lang>) =
         | :? FunCall<'lang> as fc -> printFunCall fc
         | :? Barrier<'lang> as b -> printBarrier b
         | :? Return<'lang> as r -> printRetun r
-        //| :? Variable<'lang> as v -> printVar v
         | t -> failwithf "Printer. Unsupported statement: %A" t
     if isToplevel
     then res

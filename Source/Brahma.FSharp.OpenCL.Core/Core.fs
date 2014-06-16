@@ -38,7 +38,6 @@ type ComputeProvider with
 
     member private this.CompileQuery<'T when 'T :> ICLKernel>(lambda:Expr, translatorOptions) =
         let kernel = System.Activator.CreateInstance<'T>()        
-//        let r, newLambda = CLCodeGenerator.GenerateKernel(lambda, this, kernel, translatorOptions)
         let r = CLCodeGenerator.GenerateKernel(lambda, this, kernel, translatorOptions)
         let str = (kernel :> ICLKernel).Source.ToString()    
         let program, error = Cl.CreateProgramWithSource(this.Context, 1u, [|str|], null)
@@ -53,14 +52,12 @@ type ComputeProvider with
         let clKernel,errpr = Cl.CreateKernel(program, CLCodeGenerator.KernelName)
         (kernel :> ICLKernel).ClKernel <- clKernel
             
-//        kernel , newLambda 
         kernel          
                     
     member this.Compile (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?translatorOptions, ?_outCode:string ref) =
         let options = defaultArg _options this.DefaultOptions_p
         let tOptions = defaultArg translatorOptions []
         this.SetCompileOptions options
-//        let kernel, newQuery = this.CompileQuery<Kernel<'TRange>>(query, tOptions)
         let kernel = this.CompileQuery<Kernel<'TRange>>(query, tOptions)
         let rng = ref Unchecked.defaultof<'TRange>
         let args = ref [||]

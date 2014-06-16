@@ -35,7 +35,6 @@ type Namer() =
 
     member this.LetStart bindingName =
         let newName = newName bindingName
-        //forAdd.Add(bindingName,newName)
         forAdd.[bindingName] <- newName
         newName
 

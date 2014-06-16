@@ -83,6 +83,7 @@ let inlineLamdas (expr:Expr) =
         | other -> other
     go expr
 
+// Copyright (c) 2014 Klimov Ivan <ivan.klimov.92@gmail.com>
 ///////////////////// deploy Let///////////////////////////////
 
 let isLetFun expr =
@@ -98,18 +99,15 @@ let isLetFun expr =
 let rec recLet expr = 
     match expr with
     | Patterns.Let(v, valExpr, inExpr1) ->
-//        let e = match valExpr with
         match valExpr with
             | Patterns.Let (var, inExpr, afterExpr) -> 
                 let newLet = recLet ( Expr.Let(v, afterExpr, inExpr1))
-//                recLet (Expr.Let(var, inExpr, recLet newLet))
                 letFunUp (Expr.Let(var, inExpr, newLet))
             | ExprShape.ShapeLambda(lv, lb) ->
                 let newLet = recLet valExpr
                 match newLet with
                 | Patterns.Let (var, inExpr, afterExpr) -> 
                     let newLetIn = (Expr.Let(v, afterExpr , inExpr1))
-//                    recLet (Expr.Let(var, inExpr, recLet newLetIn))
                     letFunUp (Expr.Let(var, inExpr, newLetIn))
                 | _ ->
                     Expr.Let(v, newLet , inExpr1) 
@@ -128,15 +126,6 @@ let rec recLet expr =
                 else
                     Expr.Lambda(lv, lb)
             | _ -> 
-//                let newExpr = recLet (lb)
-//                match newExpr with
-//                | Patterns.Let (var, inExpr, afterExpr) -> 
-//                    if(isLetFun newExpr) then
-//                        Expr.Let(var, inExpr, (Expr.Lambda(lv, afterExpr)))
-//                    else
-//                        Expr.Lambda(lv, newExpr)
-//                | _ ->
-//                    Expr.Lambda(lv, newExpr)
                 Expr.Lambda(lv, lb)
         | _ -> 
             let funUpLB = letFunUp lb1
@@ -148,15 +137,6 @@ let rec recLet expr =
                     Expr.Lambda(lv, funUpLB)
             | _ -> 
                 Expr.Lambda(lv, funUpLB)
-//                let newExpr = recLet (funUpLB)
-//                match newExpr with
-//                | Patterns.Let (var, inExpr, afterExpr) -> 
-//                    if(isLetFun newExpr) then
-//                        Expr.Let(var, inExpr, (Expr.Lambda(lv, afterExpr)))
-//                    else
-//                        Expr.Lambda(lv, newExpr)
-//                | _ ->
-//                    Expr.Lambda(lv, newExpr)
     | ExprShape.ShapeCombination(o, args) ->
         ExprShape.RebuildShapeCombination(o, List.map (fun (e:Expr) -> recLet (e)) args)
 
@@ -309,7 +289,6 @@ let renameAllTree expr (letScope:LetScope) (renamer1:Renamer) =
 
             let newLambda = Expr.Lambda(NewVar, quontationRenamerLetRec lb)
             newLambda
-            //Expr.Lambda(lv, quontationRenamerLetRec lb)
         | _ ->
             renameRec expr
     quontationRenamerLetRec expr
@@ -368,15 +347,13 @@ let addNeededLamAndAppicatins expr (letScope:LetScope) =
     run expr
 
 
-//get list expr for translation
 let getListLet expr =
     let listExpr = new ResizeArray<_>()
     let rec addLetInList expr =
         match expr with
         | Patterns.Let(var, exprIn, exprAfter) ->
-            //let v = Expr.Var(new Var("some", var.Type))
             if(isLetFun expr) then
-                let newLet = Expr.Let(var, exprIn, Expr.Value(0)) // in  body some value
+                let newLet = Expr.Let(var, exprIn, Expr.Value(0))
                 listExpr.Add(newLet)
                 addLetInList exprAfter
             else 
@@ -410,99 +387,17 @@ let getListLet expr =
     resList
 
 let quontationTransformer expr translatorOptions = 
-////    let caller = new Caller()
-//    let context = new TargetContext<_,_>()
-//    context.Namer.LetIn()
-//    context.TranslatorOptions.AddRange translatorOptions
 
     let renamer = new Renamer()
     let letScope = LetScope()
     let renamedTree = renameAllTree expr letScope renamer
 
-//    printf "\n%A" renamedTree
-
-//    quontationTransformerRec expr context caller
 
     let qTransd = quontationTransformerRec renamedTree
 
-//    printf "\n%A" qTransd
     let addedLam = addNeededLamAndAppicatins qTransd letScope
 
-//    printf "\n%A\n\n" addedLam
-
-//    let qq = <@ fun (m:int) -> 
-//                        let g k m = k + m + m
-//                        let z t m a = m + a - t
-//                        let y a n m l = 
-//                            let x = 5 - n + (g 4 m)
-//                            z (a + x + l) m a
-//                        let x n m = 
-//                            let l = m
-//                            let r = 
-//                                y 6 n m l
-//                            r + m
-//                        let p = m
-//                        x 7 m
-//            @>
-//
-//    let res =   match addedLam with
-//                | Patterns.Lambda(lv, lb) ->
-//                    (qq.Equals(lb))
-//    printf "\n%A\n" res
 
 
-
-    //addedLam
-    //printf "\n%A" addedLam
     let listExpr = getListLet addedLam
     listExpr
-//
-//let b = fun m -> 
-//            let x = 
-//                let y a = m + 5
-//                y 6
-//            x
-//
-//
-//let y' a m = m + 5
-//let b1 = fun m -> 
-//            let x = 
-//                y 6 m
-//            x
-//
-//
-//let a = fun m -> 
-//            let x n = 
-//                let l = 0
-//                let g k = k + m
-//                let r = 
-//                    let y a = 
-//                        let z t = m + a - t
-//                        let x = 5 - n + (g 4)
-//                        z (a + x + l)
-//                    y 6
-//                r + m
-//            x
-//
-//let a = fun m -> 
-//            let x n = 
-//                let l = 0
-//                let g k = k + m + m
-//                let r = 
-//                    let y a = 
-//                        let z t = m + a - t
-//                        let x = 5 - n + (g 4)
-//                        z (a + x + l)
-//                    y 6
-//                r + m
-//            x
-//
-//let z t m a = m + a - t
-//
-//let y a m = 
-//    z a m a
-//
-//let a = fun m -> 
-//            let x = 
-//                y 6 m
-//            x

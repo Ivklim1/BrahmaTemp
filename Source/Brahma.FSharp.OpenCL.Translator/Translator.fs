@@ -179,17 +179,10 @@ type FSQuotationToOpenCLTranslator() =
             listPartsASTVars.Add(List.rev vars)
             listPartsASTPartialAst.Add((partialAst :> Statement<_>))
             listPartsASTContext.Add(context)
-            //dictionaryFun.Add(partAST.FunVar.Name, partialAst)
             Body.dictionaryFun.Add(partAST.FunVar.Name, partialAst)
-       // let vars,(partialAst,context) = go newAST []
-//        listPartsASTVars.Add(vars)
-//        listPartsASTPartialAst.Add(partialAst)
-//        listPartsASTContext.Add(context)
-        //let listParts = [fun elem in listPartsASTPartialAst -> elem]
 
         let AST = buildFullAst (listPartsASTVars) (listPartsASTPartialAst) listPartsASTContext
         AST, newAST
-        //buildFullAst (List.rev vars) (partialAst :> Statement<_>) context
   
     member this.Translate qExpr translatorOptions = 
         let ast, newQExpr = translate qExpr translatorOptions

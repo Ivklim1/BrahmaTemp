@@ -40,8 +40,6 @@ type StatementBlock<'lang> (statements:ResizeArray<Statement<'lang>>)=
         statements.RemoveAt index
     member this.Append statement =
         statements.Add statement
-    //реализовать 2 метода remove конкретный
-    //append только в конец
    
 type Return<'lang> (expression:Expression<'lang>) =
     inherit Statement<'lang>()
